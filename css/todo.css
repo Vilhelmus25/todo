@@ -70,6 +70,7 @@ h1{
     color: #939393;
     margin-right: 1rem;
     text-align: left;
+    min-width: 41vh;
 }
 
 .input__add{
@@ -77,7 +78,7 @@ h1{
     background-color: #939393; 
   border: none; 
   color: #e3e3e3; 
-  padding: 0rem 1rem;
+  padding: 0rem 1.5rem;
   cursor: pointer; /* Mouse pointer on hover */
   font-size: 18px; 
 }
