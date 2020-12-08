@@ -12,6 +12,16 @@ const dateSelector = document.querySelector('.date');
 daySelector.textContent = day;
 dateSelector.textContent = date;
 
+const textArea = document.querySelector('#input__area');
+const addButton = document.querySelector('.input__add');
+let textAreaContent;
 
+addButton.addEventListener('click', addTodoItem = () => {
+
+    console.log("object");
+});
+
+
+console.log(textAreaContent);
 
 
