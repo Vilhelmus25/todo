@@ -7,6 +7,7 @@ const day = dayNames[time.getDay()];                        // a konkrét napot 
 const tempStringDate = time.toLocaleDateString('rus');      // dd.mm.yyyy
 const date = tempStringDate.replaceAll('.', '-');           // így már dd-mm-yyyy
 let todoItemsCount = 0;
+let todoItemArray = [];
 
 const daySelector = document.querySelector('.day');
 const dateSelector = document.querySelector('.date');
@@ -65,9 +66,9 @@ const createTodoElement = (input) => {
             pendingItemsCounterStyle();                              // a pending számláló formázása
             //console.log(refreshPendingItemsCounter());
             pendingItemsCounter.textContent = refreshPendingItemsCounter();
-            textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
             divListStyle();
-
+            divListAddTodoElement(textArea.value);                  // átadjuk a beírt teendő szövegét
+            textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
 
         }
 
@@ -97,26 +98,27 @@ const clearAllEvent = () => {
 const createBottomDivStyle = () => {                             // az alsó divet csinálja meg a két "gombnak"
     // creating html content
     mainContainer.style.position = "relative";
-    const divFunctions = document.createElement('div');
-    divFunctions.classList = 'showHideClear';
-    document.body.children.item(1).appendChild(divFunctions);
+    const divBottomStyle = document.createElement('div');
+    divBottomStyle.classList = 'showHideClear';
+    document.body.children.item(1).appendChild(divBottomStyle);
     let showHide = document.createElement('p');
     const clearAll = document.createElement('p');
     showHide.textContent = 'Show Complete';
     showHide.classList = 'showHide';
     clearAll.textContent = 'Clear All';
     clearAll.classList = 'clearAll';
-    divFunctions.appendChild(showHide);             // hozzá csapjuk a divhez a két elemet
-    divFunctions.appendChild(clearAll);
+    divBottomStyle.appendChild(showHide);             // hozzá csapjuk a divhez a két elemet
+    divBottomStyle.appendChild(clearAll);
 
     // css
-    divFunctions.style.margin = "auto";
-    divFunctions.style.position = "absolute";
-    divFunctions.style.bottom = "0";                    // ez teszi alulra a diven belül, kell hogy az őse relativ legyen, ez pedig abszolút
-    divFunctions.style.left = "22.5%";
-    divFunctions.style.display = "flex";
-    divFunctions.style.justifyContent = "center";
-    divFunctions.style.alignContent = "center";
+    divBottomStyle.style.margin = "auto";
+    divBottomStyle.style.position = "absolute";
+    divBottomStyle.style.bottom = "0";                    // ez teszi alulra a diven belül, kell hogy az őse relativ legyen, ez pedig abszolút
+    //divBottomStyle.style.alignContent = "auto";
+    divBottomStyle.style.display = "flex";
+    divBottomStyle.style.flexDirection = "row";
+    divBottomStyle.style.justifyContent = "center";
+    divBottomStyle.style.alignSelf = "center";
 
     // text styles
     showHide.style.marginRight = "2rem";
@@ -133,15 +135,6 @@ const refreshPendingItemsCounter = () => {
     return tempString;
 };
 
-const divListStyle = () => {
-    // css
-    divList.style.display = "flex";
-    divList.style.justifyContent = "center";
-    divList.style.alignContent = "center";
-    pendingItemsCounter.style.lineheight = "10rem";
-
-
-}
 const pendingItemsCounterStyle = () => {
     pendingItemsCounter.style.display = "flex";
     pendingItemsCounter.style.justifyContent = "left";
@@ -149,3 +142,40 @@ const pendingItemsCounterStyle = () => {
     pendingItemsCounter.style.marginLeft = "1rem";
     pendingItemsCounter.style.marginTop = "2rem";
 }
+
+const divListStyle = () => {
+    // css
+    divList.style.display = "flex";
+    divList.style.justifyContent = "center";
+    divList.style.alignContent = "center";
+    pendingItemsCounter.style.lineheight = "10rem";
+}
+
+const divListAddTodoElement = (text) => {
+    todoItemArray.push(text);           // betesszük a tömbünkbe a szöveget
+    //todoDivContainer
+    const todoDivContainer = document.createElement('div');
+    todoDivContainer.classList.add('todoDivContainer');
+    divList.appendChild(todoDivContainer);
+    //checkbox
+    const checkBox = document.createElement('input');
+    checkBox.type = 'checkBox';
+    todoDivContainer.appendChild(checkBox);
+    // text
+    const todoText = document.createElement('p');
+    todoText.classList.add('todoText');
+    todoText.value = text;
+    todoDivContainer.appendChild(todoText);
+
+    //css
+    todoDivContainer.style.display = "flex";
+    todoDivContainer.style.flexDirection = "column-reverse";                        ////                !!!!!!!!!!!!!!      Itt Tartok          !!!!!!!!!
+    todoDivContainer.style.justifyContent = "left";
+    todoDivContainer.style.alignContent = "center";
+    checkBox.marginLeft = "1rem";
+    todoText.style.width = "40vh";
+    todoText.style.lineHeight = "2rem";
+    todoText.style.lineheight = "10rem";
+
+}
+
