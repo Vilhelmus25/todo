@@ -17,6 +17,7 @@ dateSelector.textContent = date;
 
 const textArea = document.querySelector('#input__area');
 const addButton = document.querySelector('.input__add');
+const mainContainer = document.querySelector('.main-container');
 
 //const divList = document.createElement('div');
 const divList = document.querySelector('.list');
@@ -43,7 +44,7 @@ const createTodoElement = (input) => {
             // showHideClearDiv();
             // creating Bottomdiv and textbuttons 
             // div styles
-            createBottomDiv();
+            createBottomDivStyle();
 
             //querySelectors/eventHandling
             const showHideSelector = document.querySelector('.showHide');
@@ -61,25 +62,23 @@ const createTodoElement = (input) => {
         if (todoItemsCount >= 1) {
             //divList.classList.add('todos');
             divList.appendChild(pendingItemsCounter);
-
-            console.log(refreshPendingItemsCounter());
+            pendingItemsCounterStyle();                              // a pending számláló formázása
+            //console.log(refreshPendingItemsCounter());
             pendingItemsCounter.textContent = refreshPendingItemsCounter();
+            textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
+            divListStyle();
 
-            divList.style.display = "flex";
-            divList.style.justifyContent = "center";
-            divList.style.alignContent = "center";
-            pendingItemsCounter.style.lineheight = "10rem";
 
         }
 
     } else {
-        hideChill("visible");       // set visible the image and text
+        hideChill();       // set visible the image and text
         return;
     }
 
 }
 
-const hideChill = (vision) => {
+const hideChill = () => {
     // chillPic.style.visibility = `${vision}`;
     divList.removeChild(chillPic);
     //chillText.style.visibility = `${vision}`;
@@ -95,7 +94,9 @@ const clearAllEvent = () => {
     return;
 }
 
-const createBottomDiv = () => {
+const createBottomDivStyle = () => {                             // az alsó divet csinálja meg a két "gombnak"
+    // creating html content
+    mainContainer.style.position = "relative";
     const divFunctions = document.createElement('div');
     divFunctions.classList = 'showHideClear';
     document.body.children.item(1).appendChild(divFunctions);
@@ -107,10 +108,16 @@ const createBottomDiv = () => {
     clearAll.classList = 'clearAll';
     divFunctions.appendChild(showHide);             // hozzá csapjuk a divhez a két elemet
     divFunctions.appendChild(clearAll);
+
+    // css
+    divFunctions.style.margin = "auto";
+    divFunctions.style.position = "absolute";
+    divFunctions.style.bottom = "0";                    // ez teszi alulra a diven belül, kell hogy az őse relativ legyen, ez pedig abszolút
+    divFunctions.style.left = "22.5%";
     divFunctions.style.display = "flex";
     divFunctions.style.justifyContent = "center";
     divFunctions.style.alignContent = "center";
-    divFunctions.style.margin = "3rem";
+
     // text styles
     showHide.style.marginRight = "2rem";
     clearAll.style.marginLeft = "2rem";
@@ -125,3 +132,20 @@ const refreshPendingItemsCounter = () => {
     const tempString = `You have ${todoItemsCount} pending items`;
     return tempString;
 };
+
+const divListStyle = () => {
+    // css
+    divList.style.display = "flex";
+    divList.style.justifyContent = "center";
+    divList.style.alignContent = "center";
+    pendingItemsCounter.style.lineheight = "10rem";
+
+
+}
+const pendingItemsCounterStyle = () => {
+    pendingItemsCounter.style.display = "flex";
+    pendingItemsCounter.style.justifyContent = "left";
+    pendingItemsCounter.style.alignContent = "left";
+    pendingItemsCounter.style.marginLeft = "1rem";
+    pendingItemsCounter.style.marginTop = "2rem";
+}

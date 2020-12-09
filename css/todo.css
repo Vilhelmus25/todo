@@ -26,7 +26,7 @@ h1{
     font-size: 2.5rem;
 }
 
-.main{
+.main-container{
     align-items: left;
     background-color: #e3e3e3;
     display: flex;
@@ -81,6 +81,18 @@ h1{
   padding: 0rem 1.5rem;
   cursor: pointer; /* Mouse pointer on hover */
   font-size: 18px; 
+}
+#input__area:focus{
+    outline: none;
+}
+
+
+.input__add:hover{
+    background-color: #1278bd;
+    transition: background-color 0.2s ease-in-out;
+}
+.input__add:focus{
+    outline: none;
 }
 
 .day{
