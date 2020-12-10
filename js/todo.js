@@ -8,23 +8,36 @@ const tempStringDate = time.toLocaleDateString('rus');      // dd.mm.yyyy
 const date = tempStringDate.replaceAll('.', '-');           // így már dd-mm-yyyy
 let todoItemsCount = 0;
 let todoItemArray = [];
+let cheersVisible = true;
 
+// date selectors
 const daySelector = document.querySelector('.day');
 const dateSelector = document.querySelector('.date');
-const chillPic = document.querySelector('.cheers');
-const chillText = document.querySelector('.chill');
 daySelector.textContent = day;
 dateSelector.textContent = date;
 
+// selectors
 const textArea = document.querySelector('#input__area');
 const addButton = document.querySelector('.input__add');
 const mainContainer = document.querySelector('.main-container');
+const cheersContainer = document.querySelector('.cheers-container');
+const chillPic = document.querySelector('.cheers');
+const chillText = document.querySelector('.chill');
 
-//const divList = document.createElement('div');
-const divList = document.querySelector('.list');
+// pendingItemCounter
 const pendingItemsCounter = document.createElement('p');
 pendingItemsCounter.classList.add('pendingsCounter');
 const pendingItemsCounterSelector = document.querySelector('.pendingsCounter');
+const divForPendingCounter = document.createElement('div');
+divForPendingCounter.classList.add('divForPendingCounter');
+mainContainer.appendChild(divForPendingCounter);
+divForPendingCounter.appendChild(pendingItemsCounter);
+
+// divList Container
+const divList = document.createElement('div');
+divList.classList.add('.divList');
+const divListSelector = document.querySelector('divList');
+mainContainer.appendChild(divList);
 
 
 let textAreaContent = '';
@@ -40,8 +53,8 @@ const createTodoElement = (input) => {
 
         // hide img and text
 
-        if (todoItemsCount == 1) {
-            hideChill("hidden");
+        if (cheersVisible == true) {
+            hideChill();
             // showHideClearDiv();
             // creating Bottomdiv and textbuttons 
             // div styles
@@ -60,12 +73,12 @@ const createTodoElement = (input) => {
             });
         }
 
-        if (todoItemsCount >= 1) {
+        if (todoItemsCount >= 0) {
             //divList.classList.add('todos');
-            divList.appendChild(pendingItemsCounter);
+            cheersVisible = false;
             pendingItemsCounterStyle();                              // a pending számláló formázása
+            refreshPendingItemsCounter();
             //console.log(refreshPendingItemsCounter());
-            pendingItemsCounter.textContent = refreshPendingItemsCounter();
             divListStyle();
             divListAddTodoElement(textArea.value);                  // átadjuk a beírt teendő szövegét
             textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
@@ -73,7 +86,8 @@ const createTodoElement = (input) => {
         }
 
     } else {
-        hideChill();       // set visible the image and text
+        // hideChill();    
+        cheersVisible = true;
         return;
     }
 
@@ -81,9 +95,10 @@ const createTodoElement = (input) => {
 
 const hideChill = () => {
     // chillPic.style.visibility = `${vision}`;
-    divList.removeChild(chillPic);
+    cheersContainer.removeChild(chillPic);
     //chillText.style.visibility = `${vision}`;
-    divList.removeChild(chillText);
+    cheersContainer.removeChild(chillText);
+
 }
 
 const showHideEvent = () => {
@@ -99,7 +114,7 @@ const createBottomDivStyle = () => {                             // az alsó div
     // creating html content
     mainContainer.style.position = "relative";
     const divBottomStyle = document.createElement('div');
-    divBottomStyle.classList = 'showHideClear';
+    divBottomStyle.classList.add('showHideClear');
     document.body.children.item(1).appendChild(divBottomStyle);
     let showHide = document.createElement('p');
     const clearAll = document.createElement('p');
@@ -114,6 +129,7 @@ const createBottomDivStyle = () => {                             // az alsó div
     divBottomStyle.style.margin = "auto";
     divBottomStyle.style.position = "absolute";
     divBottomStyle.style.bottom = "0";                    // ez teszi alulra a diven belül, kell hogy az őse relativ legyen, ez pedig abszolút
+
     //divBottomStyle.style.alignContent = "auto";
     divBottomStyle.style.display = "flex";
     divBottomStyle.style.flexDirection = "row";
@@ -132,20 +148,22 @@ const createBottomDivStyle = () => {                             // az alsó div
 
 const refreshPendingItemsCounter = () => {
     const tempString = `You have ${todoItemsCount} pending items`;
-    return tempString;
+    pendingItemsCounter.textContent = tempString;
 };
 
 const pendingItemsCounterStyle = () => {
     pendingItemsCounter.style.display = "flex";
     pendingItemsCounter.style.justifyContent = "left";
     pendingItemsCounter.style.alignContent = "left";
-    pendingItemsCounter.style.marginLeft = "1rem";
+    pendingItemsCounter.style.marginLeft = "2rem";
     pendingItemsCounter.style.marginTop = "2rem";
 }
 
 const divListStyle = () => {
     // css
     divList.style.display = "flex";
+    divList.style.flexDirection = "column";
+    divList.style.flexWrap = "wrap";
     divList.style.justifyContent = "center";
     divList.style.alignContent = "center";
     pendingItemsCounter.style.lineheight = "10rem";
@@ -156,7 +174,7 @@ const divListAddTodoElement = (text) => {
     //todoDivContainer
     const todoDivContainer = document.createElement('div');
     todoDivContainer.classList.add('todoDivContainer');
-    divList.appendChild(todoDivContainer);
+    divList.prepend(todoDivContainer);                                  // prepend appendChild helyett, ez felülre teszi és nem alulra! :)
     //checkbox
     const checkBox = document.createElement('input');
     checkBox.type = 'checkBox';
@@ -164,18 +182,59 @@ const divListAddTodoElement = (text) => {
     // text
     const todoText = document.createElement('p');
     todoText.classList.add('todoText');
-    todoText.value = text;
+    todoText.textContent = text;
     todoDivContainer.appendChild(todoText);
+    //trashbin
+    const trashBinBtn = document.createElement('button');
+    const trashBinIcon = document.createElement('i');
+    trashBinBtn.classList.add('trashBinBtn');
+    trashBinIcon.classList.add('fa', 'fa-trash');               // fontos a helyes szintaktika ha osztályokat sorolunk fel js-ben, itt ','-vel van elválasztva és minden class item külön kaparásban van
+    trashBinBtn.appendChild(trashBinIcon);
+    todoDivContainer.appendChild(trashBinBtn);
 
     //css
+    //container
     todoDivContainer.style.display = "flex";
-    todoDivContainer.style.flexDirection = "column-reverse";                        ////                !!!!!!!!!!!!!!      Itt Tartok          !!!!!!!!!
-    todoDivContainer.style.justifyContent = "left";
+    todoDivContainer.style.flexDirection = "row";
+    todoDivContainer.style.flexWrap = "nowrap";
+    todoDivContainer.style.justifyContent = "center";
     todoDivContainer.style.alignContent = "center";
+    todoDivContainer.style.background = "#b2cdda";
+    todoDivContainer.style.padding = "0.5rem";
+    todoDivContainer.style.margin = "0.5rem";
+    //   todoDivContainer.style.borderRadius = "5%";
+    //checkbox
     checkBox.marginLeft = "1rem";
+    checkBox.style.width = "25px";
+    checkBox.style.height = "25px";
+    checkBox.style.marginRight = "1rem";
+    checkBox.style.cursor = "pointer";
+    //text
     todoText.style.width = "40vh";
     todoText.style.lineHeight = "2rem";
     todoText.style.lineheight = "10rem";
+    todoText.style.margin = "auto";
 
-}
+    // trashbin
+    trashBinIcon.style.color = "#eeeeee";
+    trashBinIcon.style.fontSize = "1rem";
+    trashBinBtn.style.backgroundColor = "#f8542b";
+    trashBinBtn.style.border = "none";
+    trashBinBtn.style.width = "30px";
+    trashBinBtn.style.height = "30px";
+    trashBinBtn.style.margin = "auto";
+    trashBinBtn.style.cursor = "pointer";
+    trashBinBtn.style.visibility = "hidden";                                                            // alapból nem látszódik
+    todoDivContainer.addEventListener('mouseenter', () => trashBinBtn.style.visibility = "visible");    // ha belép a divbe az egér, akkor látszik
+    todoDivContainer.addEventListener('mouseleave', () => trashBinBtn.style.visibility = "hidden");     // ha kilép akkor eltűnik
+
+    const trashBinBtnSelector = document.querySelector('.trashBinBtn');
+    trashBinBtnSelector.addEventListener("click", (event) => {
+        todoDivContainer.remove(mainContainer);
+        todoItemsCount -= 1;
+        refreshPendingItemsCounter();
+    });   // ha a kukára nyomunk oda is kerül a div, csökkentjük eggyel a pendingek számát
+
+};
+
 

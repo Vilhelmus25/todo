@@ -59,7 +59,7 @@ h1{
 }
 
 
-.list{
+.cheers-container{
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -120,4 +120,8 @@ h1{
     margin-bottom: 3rem;
     width: 100%;
     
+}
+
+.trashBinBtn:hover{
+    visibility: visible;
 }
