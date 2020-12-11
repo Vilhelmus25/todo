@@ -23,8 +23,8 @@ const textArea = document.querySelector('#input__area');
 const addButton = document.querySelector('.input__add');
 const mainContainer = document.querySelector('.main-container');
 const cheersContainer = document.querySelector('.cheers-container');
-const chillPic = document.querySelector('.cheers');
-const chillText = document.querySelector('.chill');
+let chillPic = document.querySelector('.cheers');
+let chillText = document.querySelector('.chill');
 
 // pendingItemCounter
 const pendingItemsCounter = document.createElement('p');
@@ -32,14 +32,12 @@ pendingItemsCounter.classList.add('pendingsCounter');
 const pendingItemsCounterSelector = document.querySelector('.pendingsCounter');
 const divForPendingCounter = document.createElement('div');
 divForPendingCounter.classList.add('divForPendingCounter');
-mainContainer.appendChild(divForPendingCounter);
-divForPendingCounter.appendChild(pendingItemsCounter);
+
 
 // divList Container
 const divList = document.createElement('div');
 divList.classList.add('.divList');
 const divListSelector = document.querySelector('divList');
-mainContainer.appendChild(divList);
 
 // divDoneList Container
 const divDoneList = document.createElement('div');
@@ -48,9 +46,13 @@ divDoneList.style.visibility = "hidden";
 //  divDoneText
 const divDoneText = document.createElement('p');
 divDoneText.classList.add('doneText');
-//divDoneText.textContent = `Completed tasks: ${100 / (todoItemsCount / 2)}%`;
-divDoneList.appendChild(divDoneText);
-mainContainer.appendChild(divDoneList);
+
+// divBottom
+const divBottomStyle = document.createElement('div');
+divBottomStyle.classList.add('showHideClear');
+let showHide = document.createElement('p');
+const clearAll = document.createElement('p');
+
 
 
 let textAreaContent = '';
@@ -58,7 +60,6 @@ addButton.addEventListener('click', (event) => {
     textAreaContent = textArea.value;
     todoItemsCount += 1;
     createTodoElement(textAreaContent);
-    //console.log(textAreaContent);
 });
 
 const createTodoElement = (input) => {
@@ -67,12 +68,11 @@ const createTodoElement = (input) => {
         // hide img and text
 
         if (cheersVisible == true) {
-            hideChill();
+            removeChill();
             // showHideClearDiv();
             // creating Bottomdiv and textbuttons 
             // div styles
             createBottomDivStyle();
-
             //querySelectors/eventHandling
             const showHideSelector = document.querySelector('.showHide');
             const clearAllSelector = document.querySelector('.clearAll');
@@ -86,7 +86,7 @@ const createTodoElement = (input) => {
             });
         }
 
-        if (todoItemsCount >= 0) {
+        if (todoItemsCount > 0) {
             //divList.classList.add('todos');
             cheersVisible = false;
             pendingItemsCounterStyle();                              // a pending számláló formázása
@@ -107,7 +107,7 @@ const createTodoElement = (input) => {
 
 }
 
-const hideChill = () => {
+const removeChill = () => {
     // chillPic.style.visibility = `${vision}`;
     cheersContainer.removeChild(chillPic);
     //chillText.style.visibility = `${vision}`;
@@ -115,9 +115,19 @@ const hideChill = () => {
 
 }
 
-const showHideEvent = () => {
-    console.log("object1");
-    return;
+const showHideEvent = () => {                                                               // !!!!!!!!!!!!!!!!!        Kétszer fut le      !!!!!!!!!!!!        
+    if (showDone) {                                 // ha hidden
+        divDoneList.style.visibility = "visible";
+        showHide.textContent = `Hide Complete`;     // legyen a szöveg hide
+        showDone = false;                           // false-re állítjuk, hogy a köv alkalommal a másik fusson le
+        console.log(showDone);
+    } else {
+        showHide.textContent = `Show Complete`;
+        divDoneList.style.visibility = "hidden";
+        showDone = true;
+        console.log(showDone);
+    }
+    return showDone;
 }
 const clearAllEvent = () => {
     console.log("object2");
@@ -127,11 +137,7 @@ const clearAllEvent = () => {
 const createBottomDivStyle = () => {                             // az alsó divet csinálja meg a két "gombnak"
     // creating html content
     mainContainer.style.position = "relative";
-    const divBottomStyle = document.createElement('div');
-    divBottomStyle.classList.add('showHideClear');
     document.body.children.item(1).appendChild(divBottomStyle);
-    let showHide = document.createElement('p');
-    const clearAll = document.createElement('p');
     showHide.textContent = 'Show Complete';
     showHide.classList = 'showHide';
     clearAll.textContent = 'Clear All';
@@ -174,6 +180,9 @@ const refreshCompletedTasksIndex = () => {
 };
 
 const pendingItemsCounterStyle = () => {
+    mainContainer.appendChild(divForPendingCounter);
+    divForPendingCounter.appendChild(pendingItemsCounter);
+    //css
     pendingItemsCounter.style.display = "flex";
     pendingItemsCounter.style.justifyContent = "left";
     pendingItemsCounter.style.alignContent = "left";
@@ -182,6 +191,10 @@ const pendingItemsCounterStyle = () => {
 }
 
 const divListStyle = () => {
+
+    mainContainer.appendChild(divList);
+    divDoneList.appendChild(divDoneText);
+    mainContainer.appendChild(divDoneList);
     // css
     divList.style.display = "flex";
     divList.style.flexDirection = "column";
@@ -264,13 +277,15 @@ const divListAddTodoElement = (text) => {
         }
         todoDivContainer.remove(mainContainer);                     // töröljük a teljes div-et
         refreshCompletedTasksIndex();                               // ide is kell egy egyes esetek miatt
-
+        checkIfHaveAnyTodos();                                      // megnézzük van-e még teendő
     });   // ha a kukára nyomunk oda is kerül a div, csökkentjük eggyel a pendingek számát
+
 
     // checkbox event
     checkBox.addEventListener('click', (event) => {
         divDoneListStyle(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div
-
+        checkBox.disabled = true;                           // kikapcsoljuk a checkboxot
+        checkIfHaveAnyTodos();
     })
 
 };
@@ -284,10 +299,31 @@ const divDoneListStyle = (parent) => {
     divDoneList.style.justifyContent = "center";
     divDoneList.style.alignContent = "center";
     divDoneList.style.margin = "2rem";
+
     todoItemsCount -= 1;
     doneItemsCount += 1;
     refreshPendingItemsCounter();
     refreshCompletedTasksIndex();
-    divDoneList.style.visibility = "visible";
 
 };
+
+const checkIfHaveAnyTodos = () => {
+    if (todoItemsCount == 0) {
+        const cheers = document.createElement('img');
+        cheers.classList.add('cheers');
+        cheers.src = "./assets/images/Cheers.png";
+        const chill = document.createElement('strong');
+        chill.classList.add('chill');
+        chill.textContent = `Time to chill! You have no todos.`;
+        cheersContainer.appendChild(cheers);
+        cheersContainer.appendChild(chill);
+
+        chillPic = document.querySelector('.cheers');
+        chillText = document.querySelector('.chill');
+        cheersVisible = true;
+        divForPendingCounter.remove();
+        divBottomStyle.remove();
+        divDoneList.remove();
+        showDone = true;
+    }
+}
