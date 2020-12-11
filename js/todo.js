@@ -7,8 +7,10 @@ const day = dayNames[time.getDay()];                        // a konkrét napot 
 const tempStringDate = time.toLocaleDateString('rus');      // dd.mm.yyyy
 const date = tempStringDate.replaceAll('.', '-');           // így már dd-mm-yyyy
 let todoItemsCount = 0;
-let todoItemArray = [];
+let doneItemsCount = 0;
+//let todoItemArray = [];
 let cheersVisible = true;
+let showDone = true;
 
 // date selectors
 const daySelector = document.querySelector('.day');
@@ -38,6 +40,17 @@ const divList = document.createElement('div');
 divList.classList.add('.divList');
 const divListSelector = document.querySelector('divList');
 mainContainer.appendChild(divList);
+
+// divDoneList Container
+const divDoneList = document.createElement('div');
+divDoneList.classList.add('divDoneList');
+divDoneList.style.visibility = "hidden";
+//  divDoneText
+const divDoneText = document.createElement('p');
+divDoneText.classList.add('doneText');
+//divDoneText.textContent = `Completed tasks: ${100 / (todoItemsCount / 2)}%`;
+divDoneList.appendChild(divDoneText);
+mainContainer.appendChild(divDoneList);
 
 
 let textAreaContent = '';
@@ -82,6 +95,7 @@ const createTodoElement = (input) => {
             divListStyle();
             divListAddTodoElement(textArea.value);                  // átadjuk a beírt teendő szövegét
             textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
+            refreshCompletedTasksIndex();
 
         }
 
@@ -150,6 +164,14 @@ const refreshPendingItemsCounter = () => {
     const tempString = `You have ${todoItemsCount} pending items`;
     pendingItemsCounter.textContent = tempString;
 };
+const refreshCompletedTasksIndex = () => {
+    if (doneItemsCount == 0) {
+        divDoneText.textContent = `Completed tasks: 0%`;
+    } else {
+
+        divDoneText.textContent = `Completed tasks: ${doneItemsCount / (doneItemsCount + todoItemsCount) * 100}%`;
+    }
+};
 
 const pendingItemsCounterStyle = () => {
     pendingItemsCounter.style.display = "flex";
@@ -170,7 +192,7 @@ const divListStyle = () => {
 }
 
 const divListAddTodoElement = (text) => {
-    todoItemArray.push(text);           // betesszük a tömbünkbe a szöveget
+    //todoItemArray.push(text);           // betesszük a tömbünkbe a szöveget
     //todoDivContainer
     const todoDivContainer = document.createElement('div');
     todoDivContainer.classList.add('todoDivContainer');
@@ -178,6 +200,7 @@ const divListAddTodoElement = (text) => {
     //checkbox
     const checkBox = document.createElement('input');
     checkBox.type = 'checkBox';
+    const checkBoxSelector = document.querySelector('.checkbox');
     todoDivContainer.appendChild(checkBox);
     // text
     const todoText = document.createElement('p');
@@ -193,7 +216,7 @@ const divListAddTodoElement = (text) => {
     todoDivContainer.appendChild(trashBinBtn);
 
     //css
-    //container
+    // container
     todoDivContainer.style.display = "flex";
     todoDivContainer.style.flexDirection = "row";
     todoDivContainer.style.flexWrap = "nowrap";
@@ -203,13 +226,13 @@ const divListAddTodoElement = (text) => {
     todoDivContainer.style.padding = "0.5rem";
     todoDivContainer.style.margin = "0.5rem";
     //   todoDivContainer.style.borderRadius = "5%";
-    //checkbox
+    // checkbox
     checkBox.marginLeft = "1rem";
     checkBox.style.width = "25px";
     checkBox.style.height = "25px";
     checkBox.style.marginRight = "1rem";
     checkBox.style.cursor = "pointer";
-    //text
+    // text
     todoText.style.width = "40vh";
     todoText.style.lineHeight = "2rem";
     todoText.style.lineheight = "10rem";
@@ -225,16 +248,46 @@ const divListAddTodoElement = (text) => {
     trashBinBtn.style.margin = "auto";
     trashBinBtn.style.cursor = "pointer";
     trashBinBtn.style.visibility = "hidden";                                                            // alapból nem látszódik
+
+    // trashbin event
     todoDivContainer.addEventListener('mouseenter', () => trashBinBtn.style.visibility = "visible");    // ha belép a divbe az egér, akkor látszik
     todoDivContainer.addEventListener('mouseleave', () => trashBinBtn.style.visibility = "hidden");     // ha kilép akkor eltűnik
-
     const trashBinBtnSelector = document.querySelector('.trashBinBtn');
-    trashBinBtnSelector.addEventListener("click", (event) => {
-        todoDivContainer.remove(mainContainer);
-        todoItemsCount -= 1;
-        refreshPendingItemsCounter();
+    trashBinBtnSelector.addEventListener("click", () => {
+        console.log(todoDivContainer.parentNode);
+        if (todoDivContainer.parentNode != divDoneList) {           // ha a törölt elem szülője a divDoneListtel egyezik, vagyis, ha nem a divDoneListből kukázunk
+            todoItemsCount -= 1;
+            refreshPendingItemsCounter();                            // frissítjük
+        } else {                                                    // ha a divDoneListből kukázunk
+            doneItemsCount -= 1;
+            refreshCompletedTasksIndex();                           // frissítjük
+        }
+        todoDivContainer.remove(mainContainer);                     // töröljük a teljes div-et
+        refreshCompletedTasksIndex();                               // ide is kell egy egyes esetek miatt
+
     });   // ha a kukára nyomunk oda is kerül a div, csökkentjük eggyel a pendingek számát
+
+    // checkbox event
+    checkBox.addEventListener('click', (event) => {
+        divDoneListStyle(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div
+
+    })
 
 };
 
+const divDoneListStyle = (parent) => {
 
+    divDoneList.appendChild(parent);
+    divDoneList.style.display = "flex";
+    divDoneList.style.flexDirection = "column";
+    divDoneList.style.flexWrap = "nowrap";
+    divDoneList.style.justifyContent = "center";
+    divDoneList.style.alignContent = "center";
+    divDoneList.style.margin = "2rem";
+    todoItemsCount -= 1;
+    doneItemsCount += 1;
+    refreshPendingItemsCounter();
+    refreshCompletedTasksIndex();
+    divDoneList.style.visibility = "visible";
+
+};
