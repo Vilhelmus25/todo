@@ -23,6 +23,8 @@ const textArea = document.querySelector('#input__area');
 const addButton = document.querySelector('.input__add');
 const mainContainer = document.querySelector('.main-container');
 const cheersContainer = document.querySelector('.cheers-container');
+const showHideSelector = document.querySelector('.showHide');
+const clearAllSelector = document.querySelector('.clearAll');
 let chillPic = document.querySelector('.cheers');
 let chillText = document.querySelector('.chill');
 
@@ -32,7 +34,6 @@ pendingItemsCounter.classList.add('pendingsCounter');
 const pendingItemsCounterSelector = document.querySelector('.pendingsCounter');
 const divForPendingCounter = document.createElement('div');
 divForPendingCounter.classList.add('divForPendingCounter');
-
 
 // divList Container
 const divList = document.createElement('div');
@@ -52,7 +53,14 @@ const divBottomStyle = document.createElement('div');
 divBottomStyle.classList.add('showHideClear');
 let showHide = document.createElement('p');
 const clearAll = document.createElement('p');
-
+showHide.addEventListener('click', (event) => {
+    showHideEvent();
+    //  ...
+});
+clearAll.addEventListener('click', (event) => {
+    clearAllEvent();
+    //  ...
+});
 
 
 let textAreaContent = '';
@@ -74,16 +82,8 @@ const createTodoElement = (input) => {
             // div styles
             createBottomDivStyle();
             //querySelectors/eventHandling
-            const showHideSelector = document.querySelector('.showHide');
-            const clearAllSelector = document.querySelector('.clearAll');
-            showHideSelector.addEventListener('click', (event) => {
-                showHideEvent();
-                //  ...
-            });
-            clearAllSelector.addEventListener('click', (event) => {
-                clearAllEvent();
-                //  ...
-            });
+
+
         }
 
         if (todoItemsCount > 0) {
@@ -115,7 +115,7 @@ const removeChill = () => {
 
 }
 
-const showHideEvent = () => {                                                               // !!!!!!!!!!!!!!!!!        Kétszer fut le      !!!!!!!!!!!!        
+const showHideEvent = () => {
     if (showDone) {                                 // ha hidden
         divDoneList.style.visibility = "visible";
         showHide.textContent = `Hide Complete`;     // legyen a szöveg hide
@@ -193,8 +193,9 @@ const pendingItemsCounterStyle = () => {
 const divListStyle = () => {
 
     mainContainer.appendChild(divList);
-    divDoneList.appendChild(divDoneText);
     mainContainer.appendChild(divDoneList);
+    divDoneList.appendChild(divDoneText);
+
     // css
     divList.style.display = "flex";
     divList.style.flexDirection = "column";
@@ -238,6 +239,7 @@ const divListAddTodoElement = (text) => {
     todoDivContainer.style.background = "#b2cdda";
     todoDivContainer.style.padding = "0.5rem";
     todoDivContainer.style.margin = "0.5rem";
+    //   divAnimation(todoDivContainer);
     //   todoDivContainer.style.borderRadius = "5%";
     // checkbox
     checkBox.marginLeft = "1rem";
@@ -285,10 +287,25 @@ const divListAddTodoElement = (text) => {
     checkBox.addEventListener('click', (event) => {
         divDoneListStyle(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div
         checkBox.disabled = true;                           // kikapcsoljuk a checkboxot
-        checkIfHaveAnyTodos();
+        checkIfHaveAnyTodos();                              // pipáljuk, megnézzük van-e még feladat
     })
 
 };
+
+// const divAnimation = (animateDiv) => {
+//     let pos = 900;
+//     console.log(animateDiv);
+//     let id = setInterval(frame, 5);
+//     function frame() {
+//         if (pos == 450) {
+//             clearInterval(id);
+//         } else {
+//             pos--;
+//             //animateDiv.style.top = pos + "px";
+//             animateDiv.style.left = `${pos}px`;
+//         }
+//     }
+// }
 
 const divDoneListStyle = (parent) => {
 
@@ -324,6 +341,7 @@ const checkIfHaveAnyTodos = () => {
         divForPendingCounter.remove();
         divBottomStyle.remove();
         divDoneList.remove();
-        showDone = true;
+        showDone = false;
+        showHideEvent();
     }
 }
