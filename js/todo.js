@@ -8,7 +8,7 @@ const tempStringDate = time.toLocaleDateString('rus');      // dd.mm.yyyy
 const date = tempStringDate.replaceAll('.', '-');           // így már dd-mm-yyyy
 let todoItemsCount = 0;
 let doneItemsCount = 0;
-//let todoItemArray = [];
+let todoDivListItemsArray = [];
 let cheersVisible = true;
 let showDone = true;
 
@@ -37,7 +37,7 @@ divForPendingCounter.classList.add('divForPendingCounter');
 
 // divList Container
 const divList = document.createElement('div');
-divList.classList.add('.divList');
+divList.classList.add('divList');
 const divListSelector = document.querySelector('divList');
 
 // divDoneList Container
@@ -47,6 +47,7 @@ divDoneList.style.visibility = "hidden";
 //  divDoneText
 const divDoneText = document.createElement('p');
 divDoneText.classList.add('doneText');
+
 
 // divBottom
 const divBottomStyle = document.createElement('div');
@@ -116,10 +117,10 @@ const removeChill = () => {
 }
 
 const showHideEvent = () => {
-    if (showDone) {                                 // ha hidden
+    if (showDone) {                                                 // ha hidden
         divDoneList.style.visibility = "visible";
-        showHide.textContent = `Hide Complete`;     // legyen a szöveg hide
-        showDone = false;                           // false-re állítjuk, hogy a köv alkalommal a másik fusson le
+        showHide.textContent = `Hide Complete`;                     // legyen a szöveg hide
+        showDone = false;                                           // false-re állítjuk, hogy a köv alkalommal a másik fusson le
         console.log(showDone);
     } else {
         showHide.textContent = `Show Complete`;
@@ -130,9 +131,18 @@ const showHideEvent = () => {
     return showDone;
 }
 const clearAllEvent = () => {
-    console.log("object2");
-    return;
-}
+    todoDivListItemsArray.forEach(todo => {                         // megnézzük az arrayt, amiben a todo-kat tároljuk
+        for (let i = 0; i < divList.childNodes.length; i++) {       // a divListában amiben a todok vannak megjelenítve, tehát a hátralévő todo-kon végigmegyünk
+            if (todo == divList.childNodes.item(i)) {               // ha egyezik a kettő, tehát ha a megjelenített todoListában van
+                todoItemsCount -= 1;                                // akkor törlés
+                return todo.remove();
+            }
+        }
+
+    });
+    refreshPendingItemsCounter();                                   // üdítő
+    checkIfHaveAnyTodos();
+};
 
 const createBottomDivStyle = () => {                             // az alsó divet csinálja meg a két "gombnak"
     // creating html content
@@ -205,12 +215,31 @@ const divListStyle = () => {
     pendingItemsCounter.style.lineheight = "10rem";
 }
 
+const divDoneListStyle = () => {
+    //divList
+    divDoneList.style.display = "flex";
+    divDoneList.style.flexDirection = "column";
+    divDoneList.style.flexWrap = "wrap";
+    divDoneList.style.justifyContent = "left";
+    divDoneList.style.alignContent = "left";
+
+    //divDoneText
+    divDoneText.style.display = "flex";
+    divDoneText.style.justifyContent = "left";
+    divDoneText.style.alignContent = "left";
+    divDoneText.style.marginLeft = "2rem";
+    divDoneText.style.marginTop = "2rem";
+
+}
+divDoneListStyle();
+
 const divListAddTodoElement = (text) => {
-    //todoItemArray.push(text);           // betesszük a tömbünkbe a szöveget
+
     //todoDivContainer
     const todoDivContainer = document.createElement('div');
     todoDivContainer.classList.add('todoDivContainer');
     divList.prepend(todoDivContainer);                                  // prepend appendChild helyett, ez felülre teszi és nem alulra! :)
+    todoDivListItemsArray.push(todoDivContainer);                       // betesszük a tömbünkbe a divet, ami tartalmazza a todo-t
     //checkbox
     const checkBox = document.createElement('input');
     checkBox.type = 'checkBox';
@@ -285,7 +314,7 @@ const divListAddTodoElement = (text) => {
 
     // checkbox event
     checkBox.addEventListener('click', (event) => {
-        divDoneListStyle(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div
+        divDoneListStyleOnCheck(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div,vagyis a todo
         checkBox.disabled = true;                           // kikapcsoljuk a checkboxot
         checkIfHaveAnyTodos();                              // pipáljuk, megnézzük van-e még feladat
     })
@@ -307,15 +336,15 @@ const divListAddTodoElement = (text) => {
 //     }
 // }
 
-const divDoneListStyle = (parent) => {
+
+const divDoneListStyleOnCheck = (parent) => {
 
     divDoneList.appendChild(parent);
     divDoneList.style.display = "flex";
     divDoneList.style.flexDirection = "column";
-    divDoneList.style.flexWrap = "nowrap";
+    divDoneList.style.flexWrap = "wrap";
     divDoneList.style.justifyContent = "center";
     divDoneList.style.alignContent = "center";
-    divDoneList.style.margin = "2rem";
 
     todoItemsCount -= 1;
     doneItemsCount += 1;
