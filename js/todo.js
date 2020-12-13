@@ -6,11 +6,18 @@ const time = new Date();
 const day = dayNames[time.getDay()];                        // a konkrét napot így nyerjük ki
 const tempStringDate = time.toLocaleDateString('rus');      // dd.mm.yyyy
 const date = tempStringDate.replaceAll('.', '-');           // így már dd-mm-yyyy
+let keyIteration = 0;
 let todoItemsCount = 0;
 let doneItemsCount = 0;
 let todoDivListItemsArray = [];
+let todoObjectArray = [
+    // ide tesszük a todo objektumokat
+];
+
 let cheersVisible = true;
 let showDone = true;
+let textAreaContent = '';
+let isInitiated = false;
 
 // date selectors
 const daySelector = document.querySelector('.day');
@@ -40,14 +47,19 @@ const divList = document.createElement('div');
 divList.classList.add('divList');
 const divListSelector = document.querySelector('divList');
 
-// divDoneList Container
-const divDoneList = document.createElement('div');
-divDoneList.classList.add('divDoneList');
-divDoneList.style.visibility = "hidden";
+// donePercent
+const divDonePercent = document.createElement('div');
+divDonePercent.classList.add('divDonePercent');
+const divDonePercentSelector = document.querySelector('.divDonePercent');
+divDonePercent.style.visibility = "hidden";
 //  divDoneText
 const divDoneText = document.createElement('p');
 divDoneText.classList.add('doneText');
 
+// divDoneList Container
+const divDoneList = document.createElement('div');
+divDoneList.classList.add('divDoneList');
+divDoneList.style.visibility = "hidden";
 
 // divBottom
 const divBottomStyle = document.createElement('div');
@@ -63,41 +75,70 @@ clearAll.addEventListener('click', (event) => {
     //  ...
 });
 
+// Localstorage handler object.
+const localDB = {
+    //localDB.setItem('todos', todos);          // ezek hintek nekünk, hogy hogyan kell használni, a profik is szokták
+    setItem(key, value) {
+        value = JSON.stringify(value);          // JSON,, tömböket,objektumokat szabványos szöveggé alakítja, hogy lehessen vele dolgozni és el lehessen küldeni, afogadó fél meg visszaalakítja 'parse'-sal
+        localStorage.setItem(key, value);
+    },
+    //localDB.getItem('todos');
+    getItem(key) {
+        const value = localStorage.getItem(key);
+        if (!value) {         // ha nincs semmi a localStorage-ban, akkor ne parsoljuk a semmit
+            return null;
+        }
+        return JSON.parse(value);
+    },
+    // localDB.removeItem('todos');
+    removeItem(key) {
+        localStorage.removeItem(key);
+    }
+};
 
-let textAreaContent = '';
+// Add on click
 addButton.addEventListener('click', (event) => {
     textAreaContent = textArea.value;
-    todoItemsCount += 1;
-    createTodoElement(textAreaContent);
+    isInitiated = false;
+    createTodoElement(isInitiated);
+    //keyIteration += 1;
 });
 
-const createTodoElement = (input) => {
+
+const createTodoElement = (initiated) => {                  // ha + gombot nyumunk
+    todoItemsCount += 1;
     if (todoItemsCount > 0) {
 
         // hide img and text
 
         if (cheersVisible == true) {
-            removeChill();
-            // showHideClearDiv();
-            // creating Bottomdiv and textbuttons 
-            // div styles
-            createBottomDivStyle();
-            //querySelectors/eventHandling
+            removeChill();                          // DiCaprio távozik
 
-
+            createBottomDivStyle();                 // legeneráljuk az alsó gombokat
         }
 
         if (todoItemsCount > 0) {
-            //divList.classList.add('todos');
-            cheersVisible = false;
-            pendingItemsCounterStyle();                              // a pending számláló formázása
-            refreshPendingItemsCounter();
-            //console.log(refreshPendingItemsCounter());
-            divListStyle();
+            if (!initiated) {
+
+                console.log(keyIteration);
+                console.log(textArea.value);
+                todoObjectArray.splice(keyIteration, 0, `{todo: '${textArea.value}}'`);            // hogy minden elem egyedi legyen, egy fix helyet elfoglal a tömbben
+                console.log(todoObjectArray);
+                localDB.setItem(`${keyIteration}`, todoObjectArray[todoObjectArray.length - 1]);
+
+            }
+
+            // hogy a storage-ban tárolt legnagyobb kulcsot megkeressük és annál 1-el nagyobb kell, hogy legyen a kezdeti értéke!!!
+            cheersVisible = false;                                  // 
+            pendingItemsCounterStyle();                             // a pending számláló formázása
+            refreshPendingItemsCounter();                           // a pending számláló frissítése
+            divListStyle();                                         // a todok stílusa
             divListAddTodoElement(textArea.value);                  // átadjuk a beírt teendő szövegét
             textArea.value = '';                                    // töröljük a textAreába beírt szöveget.
-            refreshCompletedTasksIndex();
-
+            divDonePercentStyle();                                  // az elvégzettek stílusa
+            divDoneListStyle();                                     // kiírjuk az elvégzettek arányát       (ezt ide kellett rakni, mert különben újrahíváskor az elemeket a % fölé rakta)
+            refreshCompletedTasksIndex();                           // a százalékok frissítése
+            keyIteration += 1;       // ezt csak növeljük szigorúan minden hozzáadásnál, itt majd kell olyan,
         }
 
     } else {
@@ -105,6 +146,7 @@ const createTodoElement = (input) => {
         cheersVisible = true;
         return;
     }
+
 
 }
 
@@ -117,13 +159,16 @@ const removeChill = () => {
 }
 
 const showHideEvent = () => {
-    if (showDone) {                                                 // ha hidden
+    if (showDone) {
+        // ha hidden
+        divDonePercent.style.visibility = "visible";
         divDoneList.style.visibility = "visible";
         showHide.textContent = `Hide Complete`;                     // legyen a szöveg hide
         showDone = false;                                           // false-re állítjuk, hogy a köv alkalommal a másik fusson le
         console.log(showDone);
     } else {
         showHide.textContent = `Show Complete`;
+        divDonePercent.style.visibility = "hidden";
         divDoneList.style.visibility = "hidden";
         showDone = true;
         console.log(showDone);
@@ -140,6 +185,7 @@ const clearAllEvent = () => {
         }
 
     });
+    localStorage.clear();                                       // törlünk a storage-ból is
     refreshPendingItemsCounter();                                   // üdítő
     checkIfHaveAnyTodos();
 };
@@ -204,7 +250,7 @@ const divListStyle = () => {
 
     mainContainer.appendChild(divList);
     mainContainer.appendChild(divDoneList);
-    divDoneList.appendChild(divDoneText);
+    //divDoneList.appendChild(divDoneText);
 
     // css
     divList.style.display = "flex";
@@ -215,13 +261,10 @@ const divListStyle = () => {
     pendingItemsCounter.style.lineheight = "10rem";
 }
 
-const divDoneListStyle = () => {
-    //divList
-    divDoneList.style.display = "flex";
-    divDoneList.style.flexDirection = "column";
-    divDoneList.style.flexWrap = "wrap";
-    divDoneList.style.justifyContent = "left";
-    divDoneList.style.alignContent = "left";
+const divDonePercentStyle = () => {
+    mainContainer.appendChild(divDonePercent);
+    mainContainer.appendChild(divDoneList);
+    divDonePercent.appendChild(divDoneText);
 
     //divDoneText
     divDoneText.style.display = "flex";
@@ -231,7 +274,17 @@ const divDoneListStyle = () => {
     divDoneText.style.marginTop = "2rem";
 
 }
-divDoneListStyle();
+
+const divDoneListStyle = () => {
+    //divList
+    divDoneList.style.display = "flex";
+    divDoneList.style.flexDirection = "column";
+    divDoneList.style.flexWrap = "wrap";
+    divDoneList.style.justifyContent = "center";
+    divDoneList.style.alignContent = "center";
+    divDoneText.style.lineheight = "10rem";
+
+}
 
 const divListAddTodoElement = (text) => {
 
@@ -306,6 +359,18 @@ const divListAddTodoElement = (text) => {
             doneItemsCount -= 1;
             refreshCompletedTasksIndex();                           // frissítjük
         }
+        // Storage delete
+
+        for (let i = 0; i <= keyIteration; i += 1) {
+            if (localDB.getItem(i) == `{todo: '${todoDivContainer.childNodes[1].textContent}}'`) {
+
+                localDB.removeItem(i);
+                todoObjectArray.splice(keyIteration - 1, 1);
+
+            }
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////
+
         todoDivContainer.remove(mainContainer);                     // töröljük a teljes div-et
         refreshCompletedTasksIndex();                               // ide is kell egy egyes esetek miatt
         checkIfHaveAnyTodos();                                      // megnézzük van-e még teendő
@@ -314,9 +379,19 @@ const divListAddTodoElement = (text) => {
 
     // checkbox event
     checkBox.addEventListener('click', (event) => {
+        // Storage Delete
+        for (let i = 0; i < keyIteration; i += 1) {
+            if (localDB.getItem(i) == `{todo: '${todoDivContainer.childNodes[1].textContent}}'`) {
+
+                localDB.removeItem(i);
+                todoObjectArray.splice(keyIteration - 1, 1);
+            }
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////
         divDoneListStyleOnCheck(checkBox.parentElement);           // hozzácsapjuk a divDoneListhez, a checkbox-nak a szülőjét ami egy div,vagyis a todo
         checkBox.disabled = true;                           // kikapcsoljuk a checkboxot
         checkIfHaveAnyTodos();                              // pipáljuk, megnézzük van-e még feladat
+        //console.log(todoDivContainer.classList[0]);         // ez az osztály nevét adja vissza
     })
 
 };
@@ -343,8 +418,8 @@ const divDoneListStyleOnCheck = (parent) => {
     divDoneList.style.display = "flex";
     divDoneList.style.flexDirection = "column";
     divDoneList.style.flexWrap = "wrap";
-    divDoneList.style.justifyContent = "center";
-    divDoneList.style.alignContent = "center";
+    divDoneList.style.justifyContent = "left";
+    divDoneList.style.alignContent = "left";
 
     todoItemsCount -= 1;
     doneItemsCount += 1;
@@ -374,3 +449,28 @@ const checkIfHaveAnyTodos = () => {
         showHideEvent();
     }
 }
+
+
+
+(function init() {
+
+    let max = 0;
+    for (let i = 0; i < localStorage.length; i++) {             // megnézzük mekkora a localStorage
+        if (max < parseInt(localStorage.key(i))) {              // maxkereséssel kiválasztjuk a legnagyobb kulcsot
+            max = parseInt(localStorage.key(i));
+        }
+    }
+    keyIteration = max;           // minden kulcsát lekérdezzük a key(i) metódussal, a kulcs értéke lesz a keyIteration, vagyis onnan folytatjuk az egyedi jelölést ahol abbahagytuk
+    for (let i = 0; i <= keyIteration; i++) {                    // Itt annyiszor ugrálunk amekkora a keyIteration, nem baj ha üres elemeken ugrálunk most
+
+        if (localStorage.getItem(i) != null) {
+            isInitiated = true;                                         // ez azért kell, hogy ne tegye be újra a storage-ba, egy vizsgálatot végzünk
+            textArea.value = localStorage.getItem(i).substring(localStorage.getItem(i).indexOf(`'`) + 1, localStorage.getItem(i).lastIndexOf(`}`));     // ez kivágja az objektumból a todo szövegrészt
+            textAreaContent = textArea.value;
+            todoObjectArray.push(`{todo: '${textAreaContent}}'`);
+            createTodoElement(isInitiated);
+
+        }
+    }
+
+})();
